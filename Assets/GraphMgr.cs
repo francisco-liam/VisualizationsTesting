@@ -11,7 +11,7 @@ public class GraphMgr : MonoBehaviour
     public Vector2 size;
     public Vector3 position;
     public int resolution;
-    public float logBase;
+    public bool linear;
 
     private GameInputs input;
 

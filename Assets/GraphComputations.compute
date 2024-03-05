@@ -13,6 +13,7 @@ struct ShipData
 int numShips; //total number of ships
 int entity; //index of the entity the graph is made for in EntityMgr.inst.entities
 float maxMag; //maximum magnitude of potentials to be represented on the graph
+bool logarthmic;
 
 //parameters for the fields from the AIMgr
 float attractiveExponent;
@@ -125,21 +126,33 @@ float CalculatePotential(float3 position, int entity)
 [numthreads(64, 1, 1)]
 void FunctionKernel(uint3 id : SV_DispatchThreadID)
 {
-    float3 pos = positions[id.x];
-    bool negative = false;
-    pos.y = 0;
-    float potential = CalculatePotential(pos, entity);
-    if (potential < 0)
-        negative = true;
-    potential = abs(potential) + 1;
-    float mag = 60*(logBase(potential, 10) / maxMag) * 400;
+    if (logarthmic)
+    {
+        float3 pos = positions[id.x];
+        pos.y = 0;
+        float mag = (CalculatePotential(pos, entity) / maxMag) * 400;
     
-    mag = clamp(mag, 0, 400);
-    
-    if (negative)
-        positions[id.x] = float3(pos.x, -mag, pos.z);
-    else
         positions[id.x] = float3(pos.x, mag, pos.z);
+    }
+    else
+    {
+        float3 pos = positions[id.x];
+        bool negative = false;
+        pos.y = 0;
+        float potential = CalculatePotential(pos, entity);
+        if (potential < 0)
+            negative = true;
+        potential = abs(potential) + 1;
+        float mag = 60 * (logBase(potential, 10) / maxMag) * 400;
+    
+        mag = clamp(mag, 0, 400);
+    
+        if (negative)
+            positions[id.x] = float3(pos.x, -mag, pos.z);
+        else
+            positions[id.x] = float3(pos.x, mag, pos.z);
+    }
+    
 }
 
  /*
@@ -147,12 +160,14 @@ void FunctionKernel(uint3 id : SV_DispatchThreadID)
     bool negative = false;
     pos.y = 0;
     float potential = CalculatePotential(pos, entity);
-    if(potential < 0)
+    if (potential < 0)
         negative = true;
     potential = abs(potential) + 1;
-    float mag = (logBase(potential, 10) / maxMag) * 400;
+    float mag = 60 * (logBase(potential, 10) / maxMag) * 400;
     
-    if(negative)
+    mag = clamp(mag, 0, 400);
+    
+    if (negative)
         positions[id.x] = float3(pos.x, -mag, pos.z);
     else
         positions[id.x] = float3(pos.x, mag, pos.z);

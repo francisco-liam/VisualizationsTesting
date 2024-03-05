@@ -119,7 +119,7 @@ public class GraphPlane : MonoBehaviour
         potentialShader.SetInt("numShips", EntityMgr.inst.entities.Count);
         potentialShader.SetInt("entity", EntityMgr.inst.entities.IndexOf(currentEnt));
         potentialShader.SetFloat("maxMag", GraphMgr.inst.maxMag);
-        //potentialShader.SetFloat("logBase", GraphMgr.inst.logBase);
+        potentialShader.SetBool("logarthmic", GraphMgr.inst.linear);
         potentialShader.SetFloat("attractiveExponent", AIMgr.inst.attractiveExponent);
         potentialShader.SetFloat("attractiveCoefficient", AIMgr.inst.attractionCoefficient);
         potentialShader.SetFloat("repulsiveExponent", AIMgr.inst.repulsiveExponent);
