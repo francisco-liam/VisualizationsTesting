@@ -67,6 +67,13 @@ public class AIMgr : MonoBehaviour
         }
     }
 
+    public void HandleMove(Entity381 entity, Vector3 point)
+    {
+        Move m = new Move(entity, point);
+        UnitAI uai = entity.GetComponent<UnitAI>();
+        uai.AddCommand(m);
+}
+
     void AddOrSet(Command c, UnitAI uai)
     {
         if (addDown)

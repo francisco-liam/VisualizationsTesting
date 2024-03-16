@@ -3916,6 +3916,9 @@ MonoBehaviour:
   generatedEntites: []
   entPositions: []
   letMove: 
+  numTraffic: 10
+  ownship: {fileID: 0}
+  ownshipMove: 0
 --- !u!1001 &613662227276394930
 PrefabInstance:
   m_ObjectHideFlags: 0

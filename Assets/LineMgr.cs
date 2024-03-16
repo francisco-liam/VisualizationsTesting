@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class LineMgr : MonoBehaviour
 {
@@ -77,5 +78,20 @@ public class LineMgr : MonoBehaviour
         }
         Destroy(lr);
 
+    }
+
+    public void DestroyAllLines()
+    {
+        int count = lines.Count;
+        for (int i = 0; i < count; i++)
+        {
+            LineRenderer lr = lines[0];
+            if (lines.Contains(lr))
+            {
+                tmp = lr;
+                lines.Remove(lr);
+            }
+            Destroy(lr);
+        }
     }
 }
