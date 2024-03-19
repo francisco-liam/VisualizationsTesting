@@ -840,7 +840,6 @@ MonoBehaviour:
   cameraTurnRate: 30
   currentYawEulerAngles: {x: 0, y: 0, z: 0}
   currentPitchEulerAngles: {x: 0, y: 0, z: 0}
-  numTouches: 0
   isRTSMode: 1
 --- !u!1 &591780678
 GameObject:

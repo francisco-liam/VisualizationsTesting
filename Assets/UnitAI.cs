@@ -34,6 +34,8 @@ public class UnitAI : MonoBehaviour
 
     void StopAndRemoveCommand(int index)
     {
+        if (commands[index] is Move)
+            moves.RemoveAt(index);
         commands[index].Stop();
         commands.RemoveAt(index);
     }

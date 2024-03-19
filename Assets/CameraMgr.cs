@@ -58,7 +58,7 @@ public class CameraMgr : MonoBehaviour
     public float cameraTurnRate = 10;
     public Vector3 currentYawEulerAngles = Vector3.zero;
     public Vector3 currentPitchEulerAngles = Vector3.zero;
-    public int numTouches;
+    int numTouches;
     // Update is called once per frame
     void Update()
     {
@@ -77,18 +77,17 @@ public class CameraMgr : MonoBehaviour
             yawValue = input.Camera.Yaw.ReadValue<float>();
             pitchValue = input.Camera.Pitch.ReadValue<float>();
         }
-
-
+        
         YawNode.transform.Translate(moveVector * Time.deltaTime * cameraMoveSpeed);
         
         currentYawEulerAngles = YawNode.transform.localEulerAngles;
-        currentYawEulerAngles.y +=  yawValue * cameraTurnRate * Time.deltaTime;
+        currentYawEulerAngles.y += yawValue * cameraTurnRate * Time.deltaTime;
         YawNode.transform.localEulerAngles = currentYawEulerAngles;
 
         currentPitchEulerAngles = PitchNode.transform.localEulerAngles;
         currentPitchEulerAngles.x += pitchValue * cameraTurnRate * Time.deltaTime;
         PitchNode.transform.localEulerAngles = currentPitchEulerAngles;
-
+        
         if (input.Camera.RTSView.triggered) {
             if (isRTSMode) {
                 YawNode.transform.SetParent(SelectionMgr.inst.selectedEntity.cameraRig.transform);
