@@ -5,10 +5,10 @@ using UnityEngine;
 //struct to hold individual ship data
 public struct ShipData
 {
-    public float mass;
     public Vector3 position;
+    public Vector3 velocity;
     public Vector3 movePosition;
-    public int commands;
+    public float heading;
 };
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -106,7 +106,7 @@ public class GraphPlane : MonoBehaviour
     {
         //sends ship specific information to the compute shader via compute buffer
         updateShipData();
-        ComputeBuffer shipsBuffer = new ComputeBuffer(allShipData.Count, sizeof(float) * 7 + sizeof(int));
+        ComputeBuffer shipsBuffer = new ComputeBuffer(allShipData.Count, sizeof(float) * 10);
         shipsBuffer.SetData(allShipData);
 
         //sends world position of mesh vertices to the compute shader via compute buffer
@@ -118,15 +118,51 @@ public class GraphPlane : MonoBehaviour
         //sets variables in the compute shader
         potentialShader.SetInt("numShips", EntityMgr.inst.entities.Count);
         potentialShader.SetInt("entity", EntityMgr.inst.entities.IndexOf(currentEnt));
+        potentialShader.SetInt("entCommands", currentEnt.transform.GetComponent<UnitAI>().commands.Count);
         potentialShader.SetFloat("maxMag", GraphMgr.inst.maxMag);
+
         potentialShader.SetBool("logarthmic", GraphMgr.inst.linear);
+        potentialShader.SetBool("calcWaypoint", GraphMgr.inst.calcWaypoint);
+        potentialShader.SetBool("calcRepField", GraphMgr.inst.calcRepField);
+        potentialShader.SetBool("calcAttField", GraphMgr.inst.calcAttField);
+        potentialShader.SetBool("calcCrossPosField", GraphMgr.inst.calcCrossPosField);
+        potentialShader.SetBool("calcCrossVelField", GraphMgr.inst.calcCrossVelField);
+
+        potentialShader.SetFloat("waypointExponent", AIMgr.inst.waypointExponent);
+        potentialShader.SetFloat("waypointCoefficient", AIMgr.inst.waypointCoefficient);
+        potentialShader.SetFloat("attractiveCoefficient", AIMgr.inst.attractiveCoefficient);
         potentialShader.SetFloat("attractiveExponent", AIMgr.inst.attractiveExponent);
-        potentialShader.SetFloat("attractiveCoefficient", AIMgr.inst.attractionCoefficient);
         potentialShader.SetFloat("repulsiveExponent", AIMgr.inst.repulsiveExponent);
         potentialShader.SetFloat("repulsiveCoefficient", AIMgr.inst.repulsiveCoefficient);
+        potentialShader.SetFloat("bearingAngle", AIMgr.inst.bearingAngle);
+        potentialShader.SetFloat("bearingAngleExp", AIMgr.inst.bearingAngleExp);
+        potentialShader.SetFloat("bearingCoefficient", AIMgr.inst.bearingCoefficient);
+        potentialShader.SetFloat("bearingExponent", AIMgr.inst.bearingExponent);
+        potentialShader.SetFloat("bearingCoefficient", AIMgr.inst.taAngle);
+        potentialShader.SetFloat("bearingExponent", AIMgr.inst.taAngleExp);
+        potentialShader.SetFloat("bearingCoefficient", AIMgr.inst.taCoefficient);
+        potentialShader.SetFloat("bearingExponent", AIMgr.inst.taExponent);
+
         potentialShader.SetFloat("threshold", AIMgr.inst.potentialDistanceThreshold);
         potentialShader.SetBuffer(0, "ships", shipsBuffer);
         potentialShader.SetBuffer(0, "positions", vertexBuffer);
+
+        /*
+float waypointCoefficient;
+float waypointExponent;
+float attractiveCoefficient;
+float attractiveExponent;
+float repulsiveCoefficient;
+float repulsiveExponent;
+float bearingAngle;
+float bearingAngleExp;
+float bearingCoefficient;
+float bearingExponent;
+float taAngle;
+float taAngleExp;
+float taCoefficient;
+float taExponent;
+         */
 
         //starts calculations in buffer
         potentialShader.Dispatch(0, (vertices.Count / 64) + 1, 1, 1);
@@ -146,17 +182,16 @@ public class GraphPlane : MonoBehaviour
     {
         allShipData = new List<ShipData>();
         foreach(Entity381 entity in EntityMgr.inst.entities) 
-        { 
+        {
             ShipData shipData = new ShipData();
-            shipData.mass = entity.mass;
             shipData.position = entity.position;
-            shipData.commands = entity.transform.GetComponent<UnitAI>().commands.Count;
+            shipData.velocity = entity.velocity;
+            shipData.heading = entity.heading;
             if (entity.transform.GetComponent<UnitAI>().commands.Count != 0)
                 shipData.movePosition = entity.transform.GetComponent<UnitAI>().moves[0].movePosition;
             else
                 shipData.movePosition = Vector3.zero;
             allShipData.Add(shipData);
-
         }
     }
 }

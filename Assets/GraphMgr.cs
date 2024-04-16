@@ -15,11 +15,23 @@ public class GraphMgr : MonoBehaviour
 
     private GameInputs input;
 
+    //parameters to toggle which fields to show
+    public bool calcWaypoint;
+    public bool calcRepField;
+    public bool calcAttField;
+    public bool calcCrossPosField;
+    public bool calcCrossVelField;
+
     private void Awake()
     {
         inst = this;
         input = new GameInputs();
         input.Enable();
+        calcWaypoint = true;
+        calcRepField = true;
+        calcAttField = true;
+        calcCrossPosField = true;
+        calcCrossVelField = true;
     }
 
     // Update is called once per frame

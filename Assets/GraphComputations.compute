@@ -3,24 +3,41 @@
 //struct to hold individual ship data
 struct ShipData
 {
-    float mass;
     float3 position;
+    float3 velocity;
     float3 movePosition;
-    int commands;
+    float heading;
 };
 
 //parameters
 int numShips; //total number of ships
 int entity; //index of the entity the graph is made for in EntityMgr.inst.entities
+int entCommands; //number of commands in the main ent
 float maxMag; //maximum magnitude of potentials to be represented on the graph
 bool logarthmic;
 
 //parameters for the fields from the AIMgr
-float attractiveExponent;
+float waypointCoefficient;
+float waypointExponent;
 float attractiveCoefficient;
-float repulsiveExponent;
+float attractiveExponent;
 float repulsiveCoefficient;
-float threshold;
+float repulsiveExponent;
+float bearingAngle;
+float bearingAngleExp;
+float bearingCoefficient;
+float bearingExponent;
+float taAngle;
+float taAngleExp;
+float taCoefficient;
+float taExponent;
+
+//parameters to toggle fields
+bool calcWaypoint;
+bool calcRepField;
+bool calcAttField;
+bool calcCrossPosField;
+bool calcCrossVelField;
 
 RWStructuredBuffer<float3> positions; //buffer to hold mesh vertex positions
 StructuredBuffer<ShipData> ships; //buffer to hold indvidual ship data
@@ -89,35 +106,72 @@ the code in this function should be changed to give an accurate representation o
 */
 float CalculatePotential(float3 position, int entity)
 {
-    float3 attractivePotential = float3(0, 0, 0);
-    float magnitude;
-
-    if (ships[entity].commands != 0)
+    float magnitude = 0;
+    
+    float3 attractiveDist;
+    float3 attractivePotential;
+    
+    if (entCommands != 0)
     {
-        attractivePotential = ships[entity].movePosition - position;
-        float3 tmp = NormalizeVector(attractivePotential);
-        attractivePotential = tmp *
-                attractiveCoefficient * pow(VectorMagnitude(attractivePotential), attractiveExponent);
+        attractiveDist = ships[entity].movePosition - position;
+        attractivePotential = NormalizeVector(attractiveDist) *
+            waypointCoefficient * pow(VectorMagnitude(attractiveDist), waypointExponent);
     }
-
-    float3 repulsivePotential = float3(0, 0, 0);
+    else
+    {
+        attractivePotential = float3(0, 0, 0);
+    }
+    
+    float3 repField = 0;
+    float3 attField = 0;
+    float3 crossPosField = 0;
+    float3 crossVelField = 0;
+    
+    float3 starboard = NormalizeVector(cross(ships[entity].velocity, float3(0, -1, 0)));
+    
     for (int i = 0; i < numShips; i++)
     {
         if (i == entity)
             continue;
         
-        float3 diff = ships[i].position - position;
-        float dist = VectorMagnitude(diff);
-        float3 direc = NormalizeVector(diff);
+        float3 posDiff = ships[i].position - position;
+        float3 relVel = ships[i].velocity - ships[entity].velocity;
         
-        repulsivePotential += direc * repulsiveCoefficient * pow(dist, repulsiveExponent);
+        float3 entPosDiff = ships[i].position - ships[entity].position;
+        float relBearing = atan2(entPosDiff.x, entPosDiff.z) * Rad2Deg - ships[entity].heading;
+        float3 negEntPosDiff = ships[entity].position - ships[i].position;
+        float targetAngle = atan2(negEntPosDiff.x, negEntPosDiff.z) * Rad2Deg - ships[i].heading;
+        
+        float bAngle = sin((relBearing + bearingAngle) * Deg2Rad);
+        float tAngle = sin((targetAngle + taAngle) * Deg2Rad);
+        
+        repField = repField + (pow(VectorMagnitude(posDiff), repulsiveExponent) * repulsiveCoefficient * -NormalizeVector(posDiff));
+        attField = attField + (pow(VectorMagnitude(posDiff), attractiveExponent) * attractiveCoefficient * NormalizeVector(posDiff));
+        crossPosField = crossPosField + (pow((0.5 * (bAngle + 1)), bearingAngleExp) * pow(VectorMagnitude(entPosDiff), bearingExponent) * bearingCoefficient * starboard);
+        crossVelField = crossVelField + (pow((0.5 * (tAngle + 1)), taAngle) * pow(VectorMagnitude(entPosDiff), taExponent) * taCoefficient * starboard);
     }
     
-    //a negative potential magnitude represents an attractive potential while a positve magnitude represents a repulsive potential 
-    float potentialMag = VectorMagnitude(repulsivePotential) - VectorMagnitude(attractivePotential);
+    float3 starboardPosition = ships[entity].position + (300 * starboard);
     
-    //clamps the magnitude between the maxMag variable so potentials can be more readable
-    magnitude = clamp(potentialMag, -maxMag, maxMag);
+    float starboardDistance = 0;
+    starboardDistance = VectorMagnitude(starboardPosition - position);
+    
+    if (calcWaypoint)
+        magnitude = magnitude - VectorMagnitude(attractivePotential);
+    if (calcRepField)
+        magnitude = magnitude + VectorMagnitude(repField);
+    if (calcAttField)
+        magnitude = magnitude - VectorMagnitude(attField);
+    
+    if (starboardDistance < 100)
+    {
+        if (calcCrossPosField)
+            magnitude = magnitude - VectorMagnitude(crossPosField);
+        if (calcCrossVelField)
+            magnitude = magnitude - VectorMagnitude(crossVelField);
+    }
+    
+    magnitude = clamp(magnitude, -maxMag, maxMag);
     
     return magnitude;
 }

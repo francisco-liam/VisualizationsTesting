@@ -26,10 +26,20 @@ public class AIMgr : MonoBehaviour
 
     public bool isPotentialFieldsMovement = false;
     public float potentialDistanceThreshold = 1000;
-    public float attractionCoefficient = 500;
+    public float waypointCoefficient;
+    public float waypointExponent;
+    public float attractiveCoefficient = 500;
     public float attractiveExponent = -1;
     public float repulsiveCoefficient = 60000;
     public float repulsiveExponent = -2.0f;
+    public float bearingAngle;
+    public float bearingAngleExp;
+    public float bearingCoefficient;
+    public float bearingExponent;
+    public float taAngle;
+    public float taAngleExp;
+    public float taCoefficient;
+    public float taExponent;
 
 
     public RaycastHit hit;

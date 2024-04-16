@@ -1092,10 +1092,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPotentialFieldsMovement: 1
   potentialDistanceThreshold: 1000
-  attractionCoefficient: 20000
-  attractiveExponent: -1
-  repulsiveCoefficient: 240000
+  waypointCoefficient: 10000
+  waypointExponent: -1
+  attractiveCoefficient: 13000
+  attractiveExponent: -2
+  repulsiveCoefficient: 25000
   repulsiveExponent: -2
+  bearingAngle: 120
+  bearingAngleExp: 4
+  bearingCoefficient: 10000
+  bearingExponent: -1.5
+  taAngle: -90
+  taAngleExp: 2
+  taCoefficient: 60000
+  taExponent: -2
   layerMask: 0
   rClickRadiusSq: 10000
 --- !u!65 &639876784
@@ -3867,6 +3877,11 @@ MonoBehaviour:
   position: {x: -5000, y: 0, z: -5000}
   resolution: 400
   linear: 0
+  calcWaypoint: 0
+  calcRepField: 0
+  calcAttField: 0
+  calcCrossPosField: 0
+  calcCrossVelField: 0
 --- !u!1 &2144337139
 GameObject:
   m_ObjectHideFlags: 0
